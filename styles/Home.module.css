@@ -1,129 +1,120 @@
-.container {
-  padding: 0 2rem;
+.restaurantTitle{
+  width:80%;
+  margin: 20px auto;
+  text-align: center;
+  color: darkslategray
 }
 
-.main {
-  min-height: 100vh;
-  padding: 4rem 0;
-  flex: 1;
+.contentContainer{
+  width: 80%;
+  height: 80vh;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+}
+
+.reservationsContainer{
+  border-right: darkslategrey 1px dotted;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between;
 }
 
-.footer {
+.reservationCardsContainer{
+  overflow-y: auto;
+  height: 55vh;
+}
+
+.reservationCard{
+  box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.171);
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin: 0px 20px 20px 0px;
   display: flex;
-  flex: 1;
-  padding: 2rem 0;
-  border-top: 1px solid #eaeaea;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between;
 }
 
-.footer a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
+.reservationCard:hover{
+  cursor: pointer;
 }
 
-.title a {
-  color: #0070f3;
-  text-decoration: none;
+.addCustomerFields{
+  background-color: gainsboro;
+  border: darkslategray 1px dotted;
+  border-radius: 5px;
+  width: 90%;
+  margin: 0px auto;
 }
 
-.title a:hover,
-.title a:focus,
-.title a:active {
+.addCustomerTitle{
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  color: darkslategrey;
   text-decoration: underline;
+  font-size: 1rem;
 }
 
-.title {
-  margin: 0;
-  line-height: 1.15;
-  font-size: 4rem;
-}
-
-.title,
-.description {
+.addCustomerNameInput{
+  display: block;
+  width: 80%;
+  margin: 10px auto;
+  height: 32px;
   text-align: center;
 }
 
-.description {
-  margin: 4rem 0;
-  line-height: 1.5;
-  font-size: 1.5rem;
-}
-
-.code {
-  background: #fafafa;
+.addCustomerButton{
+  display: block;
+  width: 80%;
+  background-color: darkslategrey;
+  color: white;
+  font-size: '1rem';
+  margin: 10px auto;
+  padding: 10px 0px;
   border-radius: 5px;
-  padding: 0.75rem;
-  font-size: 1.1rem;
-  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
-    Bitstream Vera Sans Mono, Courier New, monospace;
+  border:rgba(0, 0, 0, 0.171)
 }
 
-.grid {
+.addCustomerButton:hover{
+  cursor: pointer;
+  background-color: seagreen;
+  color: white
+}
+
+.customersContainer{
+  height: 80vh;
+  overflow-y:auto;
+}
+
+.customerCard{
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.171);
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin: 0px 20px 20px 20px;
+  justify-content: space-between;
+}
+
+.customerNameInCustomerCard{
+  font-size: 32px;
+  margin: 10px 0px;
+}
+
+.foodContainerInCustomerCard{
+  display: grid;
+  grid-template-columns: 3fr 1fr
+}
+
+.foodItemsContainerInCustomerCard{
+  display: flex;
+  gap: 10px;
   flex-wrap: wrap;
-  max-width: 800px;
 }
 
-.card {
-  margin: 1rem;
-  padding: 1.5rem;
-  text-align: left;
-  color: inherit;
-  text-decoration: none;
-  border: 1px solid #eaeaea;
-  border-radius: 10px;
-  transition: color 0.15s ease, border-color 0.15s ease;
-  max-width: 300px;
-}
-
-.card:hover,
-.card:focus,
-.card:active {
-  color: #0070f3;
-  border-color: #0070f3;
-}
-
-.card h2 {
-  margin: 0 0 1rem 0;
-  font-size: 1.5rem;
-}
-
-.card p {
-  margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.5;
-}
-
-.logo {
-  height: 1em;
-  margin-left: 0.5rem;
-}
-
-@media (max-width: 600px) {
-  .grid {
-    width: 100%;
-    flex-direction: column;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .card,
-  .footer {
-    border-color: #222;
-  }
-  .code {
-    background: #111;
-  }
-  .logo img {
-    filter: invert(1);
-  }
+.foodItem{
+  padding: 2px;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.171);
+  height: min-content;
 }
