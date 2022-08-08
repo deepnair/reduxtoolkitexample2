@@ -214,3 +214,33 @@ Create a home page that has the restaurant's name at the top. Below the title at
     }
     ```
 1. Re-use the input and button styling from the add customer in reservations area. This makes the design scheme of the app look consistent and it saves us time.
+
+### Creating the Redux Toolkit store and reservation slice
+
+1. Add the dependencies to use redux toolkit in nextjs as follows:
+    ```
+    yarn add react-redux @reduxjs/toolkit next-redux-wrapper
+    ```
+1. Create an app folder in the root and a store.ts under the folder.
+1. To create a const store we import configureStore from @reduxjs/toolkit. We put the reducer in it. Then we create a separate const makeStore which we will use for the next-redux-wrapper. The code will look as follows:
+    ```ts
+    import {configureStore} from '@reduxjs/toolkit'
+
+    export const store = configureStore({
+        reducer: {}
+    })
+
+    export const makeStore = () => store
+    ```
+1. Then we shall define types that will be exported and finally we have to create a const wrapper that will be exported which will be used in the _app.tsx to provide the store to the app at the root level. The const wrapper's createWrapper function is imported from 'next-redux-wrapper'
+    ```ts
+    export type AppStore = ReturnType<typeof makestore>;
+    export type RootState = ReturnType<typeof store.getState>;
+    export type AppDispatch = typeof store.dispatch
+
+    export const wrapper = createWrapper<AppStore>(makestore)
+    ```
+1. Now we go to the _app.tsx and where it says export default MyApp, we'll import wrapper from our store and wrap it around MyApp after calling its withRedux method. So that it's now:
+    ```ts
+    export default wrapper.withRedux(MyApp)
+    ```
