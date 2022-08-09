@@ -232,6 +232,7 @@ Create a home page that has the restaurant's name at the top. Below the title at
 
     export const makeStore = () => store
     ```
+    The makestore essentially creates a function that makes a store. We will need to put this function into the next-redux-wrapper's createWrapper function later.
 1. Then we shall define types that will be exported and finally we have to create a const wrapper that will be exported which will be used in the _app.tsx to provide the store to the app at the root level. The const wrapper's createWrapper function is imported from 'next-redux-wrapper'
     ```ts
     export type AppStore = ReturnType<typeof makestore>;
@@ -244,3 +245,323 @@ Create a home page that has the restaurant's name at the top. Below the title at
     ```ts
     export default wrapper.withRedux(MyApp)
     ```
+1. With this the redux toolkit store is ready and we can get to making the reservationSlice that will hold the data for the reservations at the app level. To do this we create a folder called features, and create a file in it called reservationSlice.ts.
+1. In the reservationSlice we import createSlice from @reduxjs/tookit. We will create a const reservationSlice and in it will be a createSlice. Every slice takes in a name, an initial state, and reducers. The code will look as follows:
+    ```ts
+    import {createSlice} from '@reduxjs/toolkit'
+
+    const reservationSlice = createSlice({
+        name: 'reservations',
+        initialState,
+        reducers{
+
+        }
+    })
+    ```
+1. At this point typescript will yell at us because initialState is undefined. We will define it with a const initialState and by convention initialState is usually an object with a value property, under which the state is available. In our case this will be an array of strings, therefore we will also create an interface and assign this type to it. The code will look as follows:
+    ```ts
+    interface ReservationStateType{
+        value: string[]
+    }
+
+    const initialState: ReservationStateType = {
+        value: []
+    }
+    ```
+    And now typescript will be happy.
+1. In the reducer, we need to add a function that will add the name provided from the input to the state. This function will be under the reducers of the reservationSlice, the code will look as follows:
+    ```ts
+    const reservationSlice = createSlice({
+        name: 'reservations',
+        initialState,
+        reducers: {
+            add: (state, action: PayloadAction<String>) => {
+                state.value.push(action.payload)
+            }
+        }
+    })
+    ```
+    In this "add" will be the name of the function we call from our Next Pages, and components. PayloadAction here is imported from @reduxjs/toolkit and it is always the type of action. Within the generics of PayloadAction we add the type of the payload we will be passing to action. In this case it's just the name, so it will be a string. In the body of the function, we can simply push the name into the initialState array we have made. State is still immuatable so we shouldn't be able to do this but under the hood, immer is turning our mutable code into an immutable replacement.
+1. We will also add a function to remove a reservation. The code will look as follows:
+    ```ts
+        remove: (state, action: PayloadAction<number>) => {
+            state.value.splice(action.payload, 1)
+        }
+1. At the bottom of the page, we have to now export the add and remove functions for use. We will do this as follows:
+    ```ts
+    export const {add: addReservation, remove: removeReservation} = reservationSlice.actions
+    ```
+    Here we destructure the add function out of the reservationSlice, then we rename it to addReservation (that will be the function we call from our Next pages and components). We do the same with the remove function.
+1. Then we need to export default the reducer, so we can add it to the store, which makes this state accessible throughout our app. The code will look as follows:
+    ```ts
+    export default reservationSlice.reducer
+    ```
+1. Finally, we import ReservationReducer from our reservationSlice and add it to const store in our store.ts as follows:
+    ```ts
+    import reservationReducer from '../features/reservationSlice'
+
+    const store = configureStore({
+        reducer: {
+            reservations: reservationReducer
+        }
+    })
+    ```
+
+### Accessing reservations state on the page and adding new reservations to it
+
+1. In order to access our reservations state we use the useSelector hook from react-redux. We pass in state into the function of type RootState (which we import from store.ts), and the return will be state.reservations.value. The code will look as follows:
+    ```ts
+    const reservations = useSelector((state: RootState) => state.reservations.value)
+    ```
+1. Now we create a folder called components and create a ReservationCard.tsx in it to put our ReservationCard component in it.
+1. We can simply cut the code we had for our reservation card from our index.tsx and paste it after creating a component in the file with the rafce shortcut using the ES7+ React/Redux/React-Native snippets extension in VS Code.
+1. We can also create a ReservationCard.module.css in the styles folder and cut, paste the relevant css for the ReservationCard component from the Home.module.css to it.
+1. The code for ReservationCard will now look like:
+    ```jsx
+    const ReservationCard = () => {
+  
+        return (
+            <div className={styles.reservationCard} onClick={() => removeReservationaddFood()}>
+                <p>John Doe</p>
+                <FaHandPointRight style={{color: 'seagreen', fontSize: '1rem'}}/>
+            </div>
+        )
+    }
+
+    export default ReservationCard
+    ```
+    Cut, paste the import for FaHandPointRight, to prevent typescript from yelling at you.
+1. Now instead of having every component say 'John Doe', we need it to say the name from the reservation, we also need to have an id for each ReservationCard so that when we click that reservation card, it is removed from reservations and we can add it to the customer Food section. So we will add name and id to the props and replace the 'John Doe' dynamically with the name. The code will now look as follows:
+    ```jsx
+    const ReservationCard = ({name, reservationId}: {name: string, reservationId: number}) => {
+  
+        return (
+            <div className={styles.reservationCard} onClick={() => removeReservationaddFood()}>
+                <p>{name}</p>
+                <FaHandPointRight style={{color: 'seagreen', fontSize: '1rem'}}/>
+            </div>
+        )
+    }
+
+    export default ReservationCard
+    ```
+1. When a reservationCard is clicked we need the card to be removed. In order to do this we'll need access to the dispatch. We need to import useDispatch from react-redux for this. This is what the code will look like:
+    ```ts
+    const dispatch = useDispatch()
+    ```
+1. Now we create a function that will remove that particular reservation from the state. For this we will need to import removeReservation from the reservationSlice. It will look as follows:
+    ```ts
+    const removeReservationFunction = () => {
+        dispatch(removeReservation(reservationId))
+    }
+    ```
+1. Then we create an onClick property to the outermost div of the ReservationCard, and call the removeReservationFunction in it. The code for ReservationCard will now look as follows:
+    ```jsx
+    import { FaHandPointRight } from "react-icons/fa"
+    import styles from '../styles/ReservationCard.module.css'
+    import {useDispatch} from 'react-redux'
+    import { removeReservation } from "../features/reservationSlice"
+    import { addCustomer } from "../features/customerSlice"
+
+    const ReservationCard = ({name, reservationId}: {name:string, reservationId: number}) => {
+    const dispatch = useDispatch()
+    const removeReservationFunction = () => {
+        dispatch(removeReservation(reservationId))
+    }
+    return (
+        <div className={styles.reservationCard} onClick={() => removeReservationFunction()}>
+            <p>{name}</p>
+            <FaHandPointRight style={{color: 'seagreen', fontSize: '1rem'}}/>
+        </div>
+    )
+    }
+
+    export default ReservationCard
+    ```
+1. Now we can bring the state into the index.tsx by using the useSelector hook imported from react-redux. The code will look as follows:
+    ```ts
+    const reservations = useSelector((state: RootState) => state.reservations.value)
+    ```
+1. Then under the reservationCardsContainer div, we can map out the reservations and put in the relevant ReservationCard components as follows:
+    ```jsx
+    <div className={styles.reservationCardsContainer}>
+        {reservations.map((reservation, index) => {
+            return <ReservationCard name={reservation} reservationId={index}/>
+        })} 
+    </div>
+    ```
+    Now on doing yarn dev, we should see the reservations.
+1. Now to enable adding a new name to the reservations we need to create a new customer name state that we can double bind to the input, and we need to create a function that will add the name to the state. As part of the function we will need to use useDispatch from react-redux, and we need to import addReservation from the reservationSlice. At the beginning of the function, we also want to put a test such that if the iput is empty, a reservation is not added. At the end of the function, we also want to put code that will clear the input. The code will look as follows:
+    ```ts
+    const dispatch = useDispatch()
+    const [customerName, setCustomerName] = useState('')
+
+    const createReservation = () => {
+        if(customerName === ''){ 
+        return 
+        }
+        dispatch(addReservation(customerName))
+        setCustomerName('')
+    }
+    ```
+1. Now we can double bind the input, and add the function to the button on click as follows:
+    ```jsx
+    <input className={styles.addCustomerNameInput} type='text' placeholder='Customer Name' value={customerName} onChange={(e) => setCustomerName(e.target.value)}/>
+    <button className={styles.addCustomerButton} onClick={() => createReservation()}>Add</button>
+    ```
+
+### Creating the customer slice and add functionality to the customer food section
+
+1. Create a customerSlice.ts in the features folder. This will have an addCustomer, addFoodItem, and removeFoodItem function. Each Customer will need to have to have a name, a string array of foods, and a unique id (which we will use a string for since we intend to use the uuid package for unique id generation). Each foodItem will also need to have a name and a unique id (string), since we will have to remove specific food from specific people. The code for it all look as follows:
+    ```ts
+    import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+    export interface Customer{
+        name: string,
+        reservationId: string,
+        food: string[]
+    }
+
+    interface CustomerSliceStateType{
+        value: Customer[]
+    }
+
+    const initialState: CustomerSliceStateType = {
+        value: []
+    }
+
+    interface AddFoodItemType{
+        id: string,
+        foodItem: string
+    }
+
+    const customerSlice = createSlice({
+        name: 'customersFood',
+        initialState,
+        reducers: {
+            addCustomer: (state, action: PayloadAction<Customer>) => {
+                state.value.push(action.payload)
+            },
+            addFoodItem: (state, action: PayloadAction<AddFoodItemType>) => {
+                state.value.filter((customer) => customer.reservationId === action.payload.id)[0].food.push(action.payload.foodItem)
+            },
+            removeFoodItem: (state, action: PayloadAction<AddFoodItemType>) => {
+                state.value.filter((customer) => customer.reservationId === action.payload.id)[0].food.splice(state.value.filter((customer) => customer.reservationId === action.payload.id)[0].food.indexOf(action.payload.foodItem), 1)
+            }
+        }
+    })
+
+    export const {addCustomer, addFoodItem, removeFoodItem} = customerSlice.actions
+
+    export default customerSlice.reducer
+    ```
+    For the add food and remove food actions, we can use complex filters along with splices and finding indexOf together as under the hood immer will turn it into an immutable replacement.
+1. Now we need to add the reducer to the store. The store will now look as follows:
+    ```ts
+    import {configureStore} from '@reduxjs/toolkit'
+    import { createWrapper } from 'next-redux-wrapper'
+    import reservationReducer from '../features/reservationSlice'
+    import customerReducer from '../features/customerSlice'
+
+    export const store = configureStore({
+        reducer: {
+            reservations: reservationReducer,
+            customersFood: customerReducer
+        }
+    })
+
+    export const makeStore = () => store
+
+    export type AppStore = ReturnType<typeof makeStore>
+    export type RootState = ReturnType<typeof store.getState>
+    export type AppDispatch = typeof store.dispatch
+
+    export const wrapper = createWrapper<AppStore>(makeStore)
+    ```
+1. Now we can modify the ReservationCard to add a customer, as the reservation is removed. To do this, we will simply add the customer name, a new unique id using the uuid function which is imported from uuid (import {v4 as uuid} from 'uuid'). Before we can use this we need to add the uuid package and its types package as follows:
+    ```
+    yarn add uuid @types/uuid
+    ```
+    We will change the name of the removeReservationFunction and add the name to the customer food at the end. The new ReservationCard code will look as follows:
+    ```jsx
+    import { FaHandPointRight } from "react-icons/fa"
+    import styles from '../styles/ReservationCard.module.css'
+    import {useDispatch} from 'react-redux'
+    import { removeReservation } from "../features/reservationSlice"
+    import { addCustomer } from "../features/customerSlice"
+    import {v4 as uuid} from 'uuid'
+
+    const ReservationCard = ({name, reservationId}: {name:string, reservationId: number}) => {
+    const dispatch = useDispatch()
+    const removeReservationaddFood = () => {
+        dispatch(removeReservation(reservationId))
+        dispatch(addCustomer({name: name, reservationId: uuid(), food: []}))
+    }
+    return (
+        <div className={styles.reservationCard} onClick={() => removeReservationaddFood()}>
+            <p>{name}</p>
+            <FaHandPointRight style={{color: 'seagreen', fontSize: '1rem'}}/>
+        </div>
+    )
+    }
+
+    export default ReservationCard
+    ```
+1. Now we can cut, paste the code from the customersContainer div to a new CustomerCard.tsx component in the components folder after creating a function based component using rafce using the ES7+/React/Redux/React-Native snipperts extension.
+1. The component will have name (string), reservationId (string), and food (array of strings) destructured from the props and the props will be of type Customer (imported from the customerSlice).
+1. We will map through the foodItems in the foodItemsContainerInCustomerCard div, and give each a p tag with the pre-formatted class. Further we will add a hover className to the FaTimes component, that will change the cursor to a pointer in the css, so users know the x is clickable.
+1. We then create a state for the currentFoodItem, double bind it to the input, and create a function to add it to the state on click, the function will also then turn the state to an empty string so that the input becomes empty.
+1. We will also add a function to removeFoodItem. Ideally, for foodItems, there should have been a separate id for food which can be created with uuid as well as there may be two food items (both of the same type, but only one is removed). The code for the CustomerCard will look as follows:
+    ```jsx
+    import styles from '../styles/CustomerCard.module.css'
+    import homestyles from '../styles/Home.module.css'
+    import {FaTimes} from 'react-icons/fa'
+    import {addFoodItem, Customer, removeFoodItem} from '../features/customerSlice'
+    import { useState } from 'react'
+    import { useDispatch } from 'react-redux'
+
+    const CustomerCard = ({name, reservationId, food}: Customer) => {
+        const [currentFoodItem, setCurrentFoodItem] = useState('')
+        const dispatch = useDispatch()
+        const addFoodItemFunction = () => {
+            if(!currentFoodItem){return}
+            dispatch(addFoodItem({id: reservationId, foodItem: currentFoodItem}))
+            setCurrentFoodItem('')
+        }
+        const removeFoodItemFunction = (foodItem: string) => {
+            dispatch(removeFoodItem({id: reservationId, foodItem: foodItem}))
+        }
+    return (
+        <div className={styles.customerCard}>
+            <p className={styles.customerNameInCustomerCard}>{name}</p>
+            <div className={styles.foodContainerInCustomerCard}>
+                <div className={styles.foodItemsContainerInCustomerCard}>
+                    {food.map((foodItem) => {
+                        return (<p className={styles.foodItem}>{foodItem} <FaTimes className={styles.hover} style={{color: 'red', fontSize: '10px'}} onClick={() => removeFoodItemFunction(foodItem)}/></p>)
+                    })}
+                </div>
+                <div className={styles.addFoodItemsContainerInCustomerCard}>
+                    <input className={homestyles.addCustomerNameInput} type='text' placeholder='Food to add' value={currentFoodItem} onChange={(e) => setCurrentFoodItem(e.target.value)}/>
+                    <button className={homestyles.addCustomerButton} onClick={() => addFoodItemFunction()}>Add Food</button>
+                </div>
+            </div>
+        </div>
+    )
+    }
+
+    export default CustomerCard
+    ```
+1. Finally, we can bring in customers using the useSelector hook from react-redux in the index.tsx and map them onto CustomerCard components in the customersConttainer. The code will look as follows:
+    ```ts
+    const customers = useSelector((state: RootState) => state.customersFood.value)
+    ```
+    and 
+    ```jsx
+    <div className={styles.customersContainer}>   
+        {customers.map((customer) => {
+            return <CustomerCard name={customer.name} reservationId={customer.reservationId} food={customer.food}/>
+        })}
+    </div>
+    ```
+
+
