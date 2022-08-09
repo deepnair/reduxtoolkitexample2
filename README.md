@@ -10,6 +10,11 @@ Objective:
 
 Create a home page that has the restaurant's name at the top. Below the title at the left side should be the reservations, with an option to add further reservations. To the middle and right of the page must be the actual customers who have shown up at the restaurant. Each customer's food should be shown on their card along with an option to remove each item right next to the item. There should also be an option to add more food items to a customer. 
 
+1. Create the app with the following command
+    ```
+    yarn create next-app reduxtoolkitexample2 --ts
+    ```
+   All jsx related modifications will happen in the index.tsx file in the pages folder.
 1. A dark, grey-based color scheme is decided on, which will go well with the use of shadows for the reservation and customer cards. It will use colors like darkslategrey, and gainsboro.
 1. To make the title at the top, we add the following html tags and the class restaurantTitle which we get from styles which is imported from Home.module.css:
     ```jsx
